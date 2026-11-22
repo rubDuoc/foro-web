@@ -1,0 +1,197 @@
+/* ============================================================
+   Foro Conecta - estilos globales (sobre Bootstrap 5)
+   Paleta: indigo #3F3D9E (principal), coral #FF6B5B (acciones)
+   ============================================================ */
+:root {
+  --indigo: #3f3d9e;
+  --indigo-oscuro: #2b2a78;
+  --indigo-claro: #ecebff;
+  --coral: #ff6b5b;
+  --coral-oscuro: #e8513f;
+  --fondo: #f5f6fa;
+  --texto: #1f2235;
+
+  --bs-primary: var(--indigo);
+  --bs-primary-rgb: 63, 61, 158;
+  --bs-link-color: var(--indigo);
+  --bs-link-color-rgb: 63, 61, 158;
+  --bs-link-hover-color: var(--coral-oscuro);
+  --bs-body-color: var(--texto);
+  --bs-body-bg: var(--fondo);
+  --bs-border-radius: 0.6rem;
+}
+
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif;
+  background: var(--fondo);
+}
+
+h1, h2, h3, h4 {
+  font-weight: 700;
+}
+
+/* ---------- Navegacion y pie ---------- */
+.barra {
+  background: linear-gradient(90deg, var(--indigo-oscuro), var(--indigo));
+  box-shadow: 0 2px 8px rgba(31, 34, 53, 0.25);
+}
+
+.texto-coral {
+  color: var(--coral);
+}
+
+.avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--coral);
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.avatar.grande {
+  width: 72px;
+  height: 72px;
+  font-size: 1.6rem;
+}
+
+.pie {
+  background: var(--texto);
+  color: #c9cbe0;
+}
+
+.pie a {
+  color: #fff;
+  text-decoration: none;
+}
+
+/* ---------- Botones ---------- */
+.btn-primary {
+  --bs-btn-bg: var(--indigo);
+  --bs-btn-border-color: var(--indigo);
+  --bs-btn-hover-bg: var(--indigo-oscuro);
+  --bs-btn-hover-border-color: var(--indigo-oscuro);
+  --bs-btn-active-bg: var(--indigo-oscuro);
+  --bs-btn-disabled-bg: var(--indigo);
+  --bs-btn-disabled-border-color: var(--indigo);
+}
+
+.btn-outline-primary {
+  --bs-btn-color: var(--indigo);
+  --bs-btn-border-color: var(--indigo);
+  --bs-btn-hover-bg: var(--indigo);
+  --bs-btn-hover-border-color: var(--indigo);
+  --bs-btn-active-bg: var(--indigo);
+}
+
+.btn-coral {
+  background: var(--coral);
+  border-color: var(--coral);
+  color: #fff;
+  font-weight: 600;
+}
+
+.btn-coral:hover,
+.btn-coral:focus {
+  background: var(--coral-oscuro);
+  border-color: var(--coral-oscuro);
+  color: #fff;
+}
+
+/* ---------- Portada ---------- */
+.portada {
+  background: linear-gradient(135deg, var(--indigo-oscuro) 0%, var(--indigo) 60%, #5b59c9 100%);
+  color: #fff;
+  border-radius: 0 0 2rem 2rem;
+}
+
+.portada img {
+  max-height: 280px;
+}
+
+.estadistica {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 1rem;
+}
+
+/* ---------- Tarjetas ---------- */
+.tarjeta {
+  background: #fff;
+  border: 0;
+  border-radius: 1rem;
+  box-shadow: 0 2px 10px rgba(31, 34, 53, 0.08);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+a.tarjeta:hover,
+.tarjeta.interactiva:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(31, 34, 53, 0.14);
+}
+
+.icono-categoria {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: var(--indigo-claro);
+  color: var(--indigo);
+  font-size: 1.5rem;
+}
+
+.etiqueta {
+  background: var(--indigo-claro);
+  color: var(--indigo);
+  font-weight: 600;
+}
+
+.titulo-seccion {
+  border-left: 5px solid var(--coral);
+  padding-left: 0.75rem;
+}
+
+/* ---------- Formularios ---------- */
+.form-control:focus,
+.form-select:focus,
+.form-check-input:focus {
+  border-color: var(--indigo);
+  box-shadow: 0 0 0 0.2rem rgba(63, 61, 158, 0.2);
+}
+
+.form-check-input:checked {
+  background-color: var(--indigo);
+  border-color: var(--indigo);
+}
+
+.caja-formulario {
+  max-width: 520px;
+}
+
+.reglas li {
+  line-height: 1.6;
+}
+
+/* ---------- Administracion ---------- */
+.nav-tabs .nav-link.active {
+  color: var(--indigo);
+  font-weight: 600;
+  border-bottom: 3px solid var(--coral);
+}
+
+.nav-tabs .nav-link {
+  color: var(--texto);
+}
+
+.extracto {
+  background: var(--fondo);
+  border-left: 4px solid var(--coral);
+  border-radius: 0.4rem;
+  padding: 0.5rem 0.75rem;
+  white-space: pre-line;
+}

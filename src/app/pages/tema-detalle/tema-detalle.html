@@ -1,0 +1,141 @@
+<!-- VISTA (MVC): detalle de un tema -->
+<div class="container py-4">
+  @if (tema$ | async; as tema) {
+    <nav aria-label="Ruta de navegación">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a routerLink="/temas">Temas</a></li>
+        <li class="breadcrumb-item">
+          <a routerLink="/temas" [queryParams]="{ categoria: tema.categoriaId }">{{ foro.categoria(tema.categoriaId)?.nombre }}</a>
+        </li>
+        <li class="breadcrumb-item active text-truncate" aria-current="page">{{ tema.titulo }}</li>
+      </ol>
+    </nav>
+
+    @if (mensaje()) {
+      <div class="alert alert-success alert-dismissible" role="status">
+        <i class="bi bi-check-circle"></i> {{ mensaje() }}
+        <button type="button" class="btn-close" aria-label="Cerrar" (click)="mensaje.set('')"></button>
+      </div>
+    }
+    @if (error()) {
+      <div class="alert alert-danger" role="alert"><i class="bi bi-exclamation-triangle"></i> {{ error() }}</div>
+    }
+
+    <div class="row g-4">
+      <div class="col-12 col-lg-8">
+        <article class="tarjeta card p-4 mb-4">
+          <span class="badge etiqueta align-self-start mb-2">{{ foro.categoria(tema.categoriaId)?.nombre }}</span>
+          <h1 class="h2">{{ tema.titulo }}</h1>
+          <p class="text-muted small">
+            <i class="bi bi-person"></i> {{ usuarios.nombreDe(tema.usuarioId) }} ·
+            <i class="bi bi-calendar3"></i> {{ tema.fechaCreacion | date: 'dd-MM-yyyy HH:mm' }}
+          </p>
+          <p class="fs-5" style="white-space: pre-line">{{ tema.contenido }}</p>
+
+          <div class="d-flex flex-wrap gap-2 mt-2">
+            @if (foro.puedeModificar(tema.usuarioId)) {
+              <a class="btn btn-outline-primary btn-sm" [routerLink]="['/temas', tema.id, 'editar']"><i class="bi bi-pencil"></i> Editar</a>
+              <button class="btn btn-outline-danger btn-sm" type="button" (click)="eliminarTema(tema.id)"><i class="bi bi-trash"></i> Eliminar</button>
+            }
+            @if ((auth.usuario$ | async) && !esAutor(tema.usuarioId)) {
+              <button class="btn btn-outline-secondary btn-sm" type="button" (click)="abrirReporte('TEMA', tema.id)">
+                <i class="bi bi-flag"></i> Reportar tema
+              </button>
+            }
+          </div>
+        </article>
+
+        <h2 class="h4 titulo-seccion mb-3">Comentarios</h2>
+        @for (comentario of comentarios$ | async; track comentario.id) {
+          <div class="tarjeta card p-3 mb-3">
+            <div class="d-flex justify-content-between flex-wrap gap-2 small text-muted mb-2">
+              <span><i class="bi bi-person-circle"></i> <strong>{{ usuarios.nombreDe(comentario.usuarioId) }}</strong></span>
+              <span>{{ comentario.fechaCreacion | date: 'dd-MM-yyyy HH:mm' }}</span>
+            </div>
+            @if (editandoId() === comentario.id) {
+              <textarea class="form-control mb-2" rows="3" [formControl]="comentarioEditado"
+                        [class.is-invalid]="comentarioEditado.invalid && comentarioEditado.touched"></textarea>
+              <div class="invalid-feedback d-block" [hidden]="!(comentarioEditado.invalid && comentarioEditado.touched)">
+                El comentario debe tener entre 3 y 1000 caracteres.
+              </div>
+              <div class="d-flex gap-2">
+                <button class="btn btn-primary btn-sm" type="button" (click)="guardarComentario(comentario.id)">Guardar</button>
+                <button class="btn btn-light btn-sm" type="button" (click)="editandoId.set(null)">Cancelar</button>
+              </div>
+            } @else {
+              <p class="mb-2">{{ comentario.contenido }}</p>
+              <div class="d-flex flex-wrap gap-3 small">
+                @if (foro.puedeModificar(comentario.usuarioId)) {
+                  <button class="btn btn-link btn-sm p-0" type="button" (click)="editarComentario(comentario.id, comentario.contenido)">
+                    <i class="bi bi-pencil"></i> Editar
+                  </button>
+                  <button class="btn btn-link btn-sm p-0 text-danger" type="button" (click)="eliminarComentario(comentario.id)">
+                    <i class="bi bi-trash"></i> Eliminar
+                  </button>
+                }
+                @if ((auth.usuario$ | async) && !esAutor(comentario.usuarioId)) {
+                  <button class="btn btn-link btn-sm p-0 text-secondary" type="button" (click)="abrirReporte('COMENTARIO', comentario.id)">
+                    <i class="bi bi-flag"></i> Reportar
+                  </button>
+                }
+              </div>
+            }
+          </div>
+        } @empty {
+          <p class="text-muted">Aún no hay comentarios. ¡Sé el primero en participar!</p>
+        }
+
+        @if (auth.usuario$ | async) {
+          <form class="tarjeta card p-3 mt-3" (ngSubmit)="comentar(tema.id)" novalidate>
+            <label for="nuevoComentario" class="form-label fw-semibold">Escribe un comentario</label>
+            <textarea id="nuevoComentario" class="form-control" rows="3" maxlength="1000" [formControl]="nuevoComentario"
+                      [class.is-invalid]="nuevoComentario.invalid && nuevoComentario.touched"
+                      placeholder="Comparte tu opinión con respeto"></textarea>
+            <div class="invalid-feedback">El comentario debe tener entre 3 y 1000 caracteres.</div>
+            <div class="d-flex justify-content-between align-items-center mt-2">
+              <small class="text-muted">{{ nuevoComentario.value.length }}/1000</small>
+              <button class="btn btn-coral" type="submit"><i class="bi bi-send"></i> Comentar</button>
+            </div>
+          </form>
+        } @else {
+          <div class="alert alert-light border mt-3">
+            <a routerLink="/login" [queryParams]="{ volver: '/temas/' + tema.id }">Inicia sesión</a> o
+            <a routerLink="/registro">regístrate</a> para comentar.
+          </div>
+        }
+      </div>
+
+      <aside class="col-12 col-lg-4">
+        @if (reportando(); as objetivo) {
+          <div class="tarjeta card p-3 mb-3 border border-danger-subtle">
+            <h2 class="h5"><i class="bi bi-flag text-danger"></i> Reportar {{ objetivo.tipo === 'TEMA' ? 'tema' : 'comentario' }}</h2>
+            <p class="small text-muted">Indica qué norma del foro incumple. Un administrador lo revisará.</p>
+            <textarea class="form-control" rows="3" maxlength="300" [formControl]="motivoReporte"
+                      [class.is-invalid]="motivoReporte.invalid && motivoReporte.touched"
+                      placeholder="Ej: contiene spam o lenguaje ofensivo"></textarea>
+            <div class="invalid-feedback">El motivo debe tener entre 10 y 300 caracteres.</div>
+            <div class="d-flex gap-2 mt-2">
+              <button class="btn btn-danger btn-sm" type="button" (click)="enviarReporte()">Enviar reporte</button>
+              <button class="btn btn-light btn-sm" type="button" (click)="reportando.set(null)">Cancelar</button>
+            </div>
+          </div>
+        }
+        <div class="tarjeta card p-3">
+          <h2 class="h6 text-uppercase text-muted">Normas del foro</h2>
+          <ul class="small mb-0">
+            <li>Respeta a los demás usuarios.</li>
+            <li>No publiques spam ni publicidad.</li>
+            <li>Mantén los temas en su categoría.</li>
+            <li>El contenido que incumpla las normas puede ser baneado.</li>
+          </ul>
+        </div>
+      </aside>
+    </div>
+  } @else {
+    <div class="text-center py-5">
+      <i class="bi bi-chat-square-x display-4 text-muted"></i>
+      <h1 class="h3 mt-3">El tema no existe o fue removido por moderación</h1>
+      <a class="btn btn-primary mt-2" routerLink="/temas">Volver a los temas</a>
+    </div>
+  }
+</div>

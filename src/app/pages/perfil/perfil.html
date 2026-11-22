@@ -1,0 +1,115 @@
+<!-- VISTA (MVC): modificacion de perfil -->
+<div class="container py-4">
+  @if (auth.usuario$ | async; as usuario) {
+    <div class="tarjeta card p-4 mb-4">
+      <div class="d-flex flex-column flex-sm-row align-items-center gap-3 text-center text-sm-start">
+        <span class="avatar grande">{{ iniciales(usuario.nombre) }}</span>
+        <div>
+          <h1 class="h3 mb-1">{{ usuario.nombre }}</h1>
+          <p class="text-muted mb-1">&#64;{{ usuario.username }} · {{ usuario.email }}</p>
+          <span class="badge" [class.text-bg-warning]="usuario.rol === 'ADMIN'" [class.etiqueta]="usuario.rol === 'USUARIO'">{{ usuario.rol }}</span>
+          <small class="text-muted ms-2">Miembro desde {{ usuario.fechaRegistro | date: 'dd-MM-yyyy' }}</small>
+        </div>
+      </div>
+    </div>
+  }
+
+  <div class="row g-4">
+    <div class="col-12 col-lg-6">
+      <form class="tarjeta card p-4 h-100" [formGroup]="datos" (ngSubmit)="guardarDatos()" novalidate>
+        <h2 class="h5 titulo-seccion mb-3">Datos personales</h2>
+        @if (mensaje()) { <div class="alert alert-success py-2" role="status">{{ mensaje() }}</div> }
+        @if (error()) { <div class="alert alert-danger py-2" role="alert">{{ error() }}</div> }
+
+        <div class="mb-3">
+          <label for="nombre" class="form-label fw-semibold">Nombre completo</label>
+          <input id="nombre" type="text" class="form-control" formControlName="nombre" maxlength="100" [class.is-invalid]="invalido('datos', 'nombre')" />
+          <div class="invalid-feedback">
+            @if (tiene('nombre', 'soloLetras')) { Solo letras y espacios. } @else { Entre 3 y 100 caracteres. }
+          </div>
+        </div>
+        <div class="mb-3">
+          <label for="username" class="form-label fw-semibold">Nombre de usuario</label>
+          <input id="username" type="text" class="form-control" formControlName="username" maxlength="30" [class.is-invalid]="invalido('datos', 'username')" />
+          <div class="invalid-feedback">
+            @if (tiene('username', 'ocupado')) { Ese nombre de usuario ya está en uso. }
+            @else if (tiene('username', 'pattern')) { Solo letras, números y guion bajo. }
+            @else { Entre 3 y 30 caracteres. }
+          </div>
+        </div>
+        <div class="mb-3">
+          <label for="email" class="form-label fw-semibold">Correo electrónico</label>
+          <input id="email" type="email" class="form-control" formControlName="email" maxlength="150" [class.is-invalid]="invalido('datos', 'email')" />
+          <div class="invalid-feedback">
+            @if (tiene('email', 'ocupado')) { Ese correo ya está registrado. } @else { Ingresa un correo válido. }
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary mt-auto"><i class="bi bi-save"></i> Guardar cambios</button>
+      </form>
+    </div>
+
+    <div class="col-12 col-lg-6">
+      <form class="tarjeta card p-4 h-100" [formGroup]="clave" (ngSubmit)="cambiarPassword()" novalidate>
+        <h2 class="h5 titulo-seccion mb-3">Cambiar contraseña</h2>
+        @if (mensajePassword()) { <div class="alert alert-success py-2" role="status">{{ mensajePassword() }}</div> }
+        @if (errorPassword()) { <div class="alert alert-danger py-2" role="alert">{{ errorPassword() }}</div> }
+
+        <div class="mb-3">
+          <label for="actual" class="form-label fw-semibold">Contraseña actual</label>
+          <input id="actual" type="password" class="form-control" formControlName="actual" autocomplete="current-password" [class.is-invalid]="invalido('clave', 'actual')" />
+          <div class="invalid-feedback">Ingresa tu contraseña actual.</div>
+        </div>
+        <div class="mb-3">
+          <label for="nueva" class="form-label fw-semibold">Nueva contraseña</label>
+          <input id="nueva" type="password" class="form-control" formControlName="nueva" autocomplete="new-password" [class.is-invalid]="invalido('clave', 'nueva')" />
+          <div class="invalid-feedback">La contraseña no cumple todos los requisitos.</div>
+          <app-password-reglas [valor]="clave.controls.nueva.value" />
+        </div>
+        <div class="mb-3">
+          <label for="confirmar" class="form-label fw-semibold">Confirmar nueva contraseña</label>
+          <input id="confirmar" type="password" class="form-control" formControlName="confirmar" autocomplete="new-password"
+                 [class.is-invalid]="(invalido('clave', 'confirmar') || clave.hasError('noCoinciden')) && clave.controls.confirmar.touched" />
+          <div class="invalid-feedback">
+            @if (clave.hasError('noCoinciden')) { Las contraseñas no coinciden. } @else { Confirma la contraseña. }
+          </div>
+        </div>
+        <button type="submit" class="btn btn-coral"><i class="bi bi-shield-lock"></i> Cambiar contraseña</button>
+      </form>
+    </div>
+
+    <div class="col-12 col-lg-6">
+      <div class="tarjeta card p-4 h-100">
+        <h2 class="h5 titulo-seccion mb-3">Mis temas</h2>
+        <ul class="list-group list-group-flush">
+          @for (tema of misTemas$ | async; track tema.id) {
+            <li class="list-group-item d-flex justify-content-between align-items-center gap-2 px-0">
+              <a [routerLink]="['/temas', tema.id]" class="text-truncate">{{ tema.titulo }}</a>
+              <small class="text-muted text-nowrap">{{ tema.fechaCreacion | date: 'dd-MM-yyyy' }}</small>
+            </li>
+          } @empty {
+            <li class="list-group-item px-0 text-muted">Aún no publicas temas. <a routerLink="/publicar">Publica el primero</a>.</li>
+          }
+        </ul>
+      </div>
+    </div>
+
+    <div class="col-12 col-lg-6">
+      <div class="tarjeta card p-4 h-100">
+        <h2 class="h5 titulo-seccion mb-3">Mis reportes</h2>
+        <ul class="list-group list-group-flush">
+          @for (reporte of misReportes$ | async; track reporte.id) {
+            <li class="list-group-item px-0">
+              <div class="d-flex justify-content-between gap-2">
+                <strong class="small">{{ reporte.tipoContenido === 'TEMA' ? 'Tema' : 'Comentario' }} #{{ reporte.contenidoId }}</strong>
+                <span class="badge" [class]="colorEstado(reporte.estado)">{{ reporte.estado }}</span>
+              </div>
+              <small class="text-muted">{{ reporte.motivo }}</small>
+            </li>
+          } @empty {
+            <li class="list-group-item px-0 text-muted">No has reportado contenido.</li>
+          }
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>

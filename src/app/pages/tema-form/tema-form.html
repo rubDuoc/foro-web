@@ -1,0 +1,48 @@
+<!-- VISTA (MVC): formulario de tema -->
+<div class="container py-4">
+  <div class="row justify-content-center">
+    <div class="col-12 col-md-10 col-lg-8">
+      <a routerLink="/temas"><i class="bi bi-arrow-left"></i> Volver a los temas</a>
+      <h1 class="h2 titulo-seccion my-3">{{ esEdicion ? 'Editar tema' : 'Publicar un tema' }}</h1>
+
+      @if (error()) {
+        <div class="alert alert-danger" role="alert"><i class="bi bi-exclamation-triangle"></i> {{ error() }}</div>
+      }
+
+      <form class="tarjeta card p-4" [formGroup]="form" (ngSubmit)="guardar()" novalidate>
+        <div class="mb-3">
+          <label for="titulo" class="form-label fw-semibold">Título *</label>
+          <input id="titulo" type="text" class="form-control" formControlName="titulo" maxlength="150"
+                 [class.is-invalid]="invalido('titulo')" placeholder="¿Sobre qué quieres conversar?" />
+          <div class="invalid-feedback">El título es obligatorio y debe tener entre 5 y 150 caracteres.</div>
+        </div>
+
+        <div class="mb-3">
+          <label for="categoria" class="form-label fw-semibold">Categoría *</label>
+          <select id="categoria" class="form-select" formControlName="categoriaId" [class.is-invalid]="invalido('categoriaId')">
+            <option [ngValue]="0" disabled>Selecciona una categoría</option>
+            @for (c of categorias$ | async; track c.id) {
+              <option [ngValue]="c.id">{{ c.nombre }}</option>
+            }
+          </select>
+          <div class="invalid-feedback">Selecciona una categoría.</div>
+        </div>
+
+        <div class="mb-3">
+          <label for="contenido" class="form-label fw-semibold">Contenido *</label>
+          <textarea id="contenido" class="form-control" rows="7" formControlName="contenido" maxlength="2000"
+                    [class.is-invalid]="invalido('contenido')" placeholder="Cuéntale a la comunidad"></textarea>
+          <div class="invalid-feedback">El contenido es obligatorio y debe tener entre 10 y 2000 caracteres.</div>
+          <div class="form-text text-end">{{ form.controls.contenido.value.length }}/2000</div>
+        </div>
+
+        <div class="d-flex flex-column flex-sm-row gap-2 justify-content-end">
+          <a class="btn btn-light" routerLink="/temas">Cancelar</a>
+          <button type="submit" class="btn btn-coral" [disabled]="form.disabled">
+            <i class="bi bi-send"></i> {{ esEdicion ? 'Guardar cambios' : 'Publicar tema' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

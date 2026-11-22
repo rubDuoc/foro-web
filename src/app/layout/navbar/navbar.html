@@ -1,0 +1,71 @@
+<!-- VISTA (MVC): barra de navegacion responsiva (se colapsa en celulares) -->
+<nav class="navbar navbar-expand-lg navbar-dark barra sticky-top">
+  <div class="container">
+    <a class="navbar-brand d-flex align-items-center gap-2" routerLink="/">
+      <img src="logo.svg" alt="Logo de Foro Conecta" width="38" height="38" />
+      <span class="fw-bold">Foro <span class="texto-coral">Conecta</span></span>
+    </a>
+
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menuPrincipal"
+            aria-controls="menuPrincipal" aria-expanded="false" aria-label="Abrir menu">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="menuPrincipal">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+            <i class="bi bi-house-door"></i> Inicio
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/temas" routerLinkActive="active"><i class="bi bi-chat-square-text"></i> Temas</a>
+        </li>
+        @if (usuario$ | async) {
+          <li class="nav-item">
+            <a class="nav-link" routerLink="/publicar" routerLinkActive="active"><i class="bi bi-plus-circle"></i> Publicar</a>
+          </li>
+        }
+        @if (auth.esAdmin$ | async) {
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-shield-lock"></i> Administración
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" routerLink="/admin/moderacion"><i class="bi bi-flag"></i> Moderación</a></li>
+              <li><a class="dropdown-item" routerLink="/admin/usuarios"><i class="bi bi-people"></i> Usuarios</a></li>
+              <li><a class="dropdown-item" routerLink="/admin/categorias"><i class="bi bi-tags"></i> Categorías</a></li>
+            </ul>
+          </li>
+        }
+      </ul>
+
+      @if (usuario$ | async; as usuario) {
+        <div class="dropdown">
+          <button class="btn btn-link nav-link dropdown-toggle d-flex align-items-center gap-2 text-white" type="button"
+                  data-bs-toggle="dropdown" aria-expanded="false">
+            <span class="avatar">{{ iniciales(usuario.nombre) }}</span>
+            <span>{{ usuario.username }}</span>
+            @if (usuario.rol === 'ADMIN') {
+              <span class="badge text-bg-warning">ADMIN</span>
+            }
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end">
+            <li><a class="dropdown-item" routerLink="/perfil"><i class="bi bi-person-gear"></i> Mi perfil</a></li>
+            <li><hr class="dropdown-divider" /></li>
+            <li>
+              <button class="dropdown-item text-danger" type="button" (click)="cerrarSesion()">
+                <i class="bi bi-box-arrow-right"></i> Cerrar sesión
+              </button>
+            </li>
+          </ul>
+        </div>
+      } @else {
+        <div class="d-flex flex-column flex-lg-row gap-2">
+          <a class="btn btn-outline-light" routerLink="/login">Iniciar sesión</a>
+          <a class="btn btn-coral" routerLink="/registro">Registrarse</a>
+        </div>
+      }
+    </div>
+  </div>
+</nav>

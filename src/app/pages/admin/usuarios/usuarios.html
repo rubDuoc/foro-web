@@ -1,0 +1,53 @@
+<!-- VISTA (MVC): gestion de usuarios -->
+<div class="container py-4">
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-4">
+    <h1 class="h2 titulo-seccion mb-0"><i class="bi bi-people"></i> Usuarios</h1>
+    <div class="input-group" style="max-width: 320px">
+      <span class="input-group-text"><i class="bi bi-search"></i></span>
+      <input type="search" class="form-control" placeholder="Buscar por nombre" [formControl]="busqueda" aria-label="Buscar usuario" />
+    </div>
+  </div>
+
+  @if (mensaje()) {
+    <div class="alert alert-success alert-dismissible" role="status">
+      {{ mensaje() }}
+      <button type="button" class="btn-close" aria-label="Cerrar" (click)="mensaje.set('')"></button>
+    </div>
+  }
+
+  <div class="table-responsive tarjeta card">
+    <table class="table table-hover align-middle mb-0">
+      <thead class="table-light">
+        <tr><th>Usuario</th><th class="d-none d-md-table-cell">Correo</th><th class="d-none d-lg-table-cell">Registro</th><th>Rol</th><th></th></tr>
+      </thead>
+      <tbody>
+        @for (usuario of usuarios$ | async; track usuario.id) {
+          <tr>
+            <td>
+              <strong>{{ usuario.username }}</strong>
+              <div class="small text-muted">{{ usuario.nombre }}</div>
+            </td>
+            <td class="d-none d-md-table-cell">{{ usuario.email }}</td>
+            <td class="d-none d-lg-table-cell">{{ usuario.fechaRegistro | date: 'dd-MM-yyyy' }}</td>
+            <td style="min-width: 130px">
+              <select class="form-select form-select-sm" [value]="usuario.rol" [disabled]="esYo(usuario)"
+                      (change)="cambiarRol(usuario, $any($event.target).value)" [attr.aria-label]="'Rol de ' + usuario.username">
+                <option value="USUARIO" [selected]="usuario.rol === 'USUARIO'">USUARIO</option>
+                <option value="ADMIN" [selected]="usuario.rol === 'ADMIN'">ADMIN</option>
+              </select>
+            </td>
+            <td class="text-end">
+              @if (esYo(usuario)) {
+                <span class="badge text-bg-light">Tú</span>
+              } @else {
+                <button class="btn btn-outline-danger btn-sm" type="button" (click)="eliminar(usuario)" [attr.aria-label]="'Eliminar ' + usuario.username">
+                  <i class="bi bi-trash"></i>
+                </button>
+              }
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>

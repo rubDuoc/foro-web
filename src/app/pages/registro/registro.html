@@ -1,0 +1,84 @@
+<!-- VISTA (MVC): registro de usuarios -->
+<div class="container py-5">
+  <div class="caja-formulario mx-auto">
+    <div class="text-center mb-4">
+      <img src="logo.svg" alt="" width="64" height="64" />
+      <h1 class="h3 mt-2">Crear cuenta</h1>
+      <p class="text-muted">Únete a la comunidad de Foro Conecta</p>
+    </div>
+
+    @if (error()) {
+      <div class="alert alert-danger" role="alert"><i class="bi bi-exclamation-triangle"></i> {{ error() }}</div>
+    }
+
+    <form class="tarjeta card p-4" [formGroup]="form" (ngSubmit)="registrar()" novalidate>
+      <div class="mb-3">
+        <label for="nombre" class="form-label fw-semibold">Nombre completo *</label>
+        <input id="nombre" type="text" class="form-control" formControlName="nombre" maxlength="100" autocomplete="name"
+               [class.is-invalid]="invalido('nombre')" />
+        <div class="invalid-feedback">
+          @if (error_('nombre', 'soloLetras')) { Solo letras y espacios. }
+          @else { El nombre es obligatorio (entre 3 y 100 caracteres). }
+        </div>
+      </div>
+
+      <div class="row g-3 mb-3">
+        <div class="col-12 col-sm-6">
+          <label for="username" class="form-label fw-semibold">Nombre de usuario *</label>
+          <input id="username" type="text" class="form-control" formControlName="username" maxlength="30" autocomplete="username"
+                 [class.is-invalid]="invalido('username')" />
+          <div class="invalid-feedback">
+            @if (error_('username', 'ocupado')) { Ese nombre de usuario ya está en uso. }
+            @else if (error_('username', 'pattern')) { Solo letras, números y guion bajo. }
+            @else { Obligatorio, entre 3 y 30 caracteres. }
+          </div>
+        </div>
+        <div class="col-12 col-sm-6">
+          <label for="email" class="form-label fw-semibold">Correo electrónico *</label>
+          <input id="email" type="email" class="form-control" formControlName="email" maxlength="150" autocomplete="email"
+                 [class.is-invalid]="invalido('email')" />
+          <div class="invalid-feedback">
+            @if (error_('email', 'ocupado')) { Ese correo ya está registrado. }
+            @else { Ingresa un correo válido. }
+          </div>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label for="password" class="form-label fw-semibold">Contraseña *</label>
+        <div class="input-group has-validation">
+          <input id="password" class="form-control" formControlName="password" autocomplete="new-password"
+                 [type]="verPassword() ? 'text' : 'password'" [class.is-invalid]="invalido('password')" />
+          <button class="btn btn-outline-secondary" type="button" (click)="verPassword.set(!verPassword())"
+                  [attr.aria-label]="verPassword() ? 'Ocultar contraseña' : 'Mostrar contraseña'">
+            <i class="bi" [class.bi-eye]="!verPassword()" [class.bi-eye-slash]="verPassword()"></i>
+          </button>
+          <div class="invalid-feedback">
+            @if (error_('password', 'espacios')) { La contraseña no puede tener espacios. }
+            @else { La contraseña no cumple todos los requisitos. }
+          </div>
+        </div>
+        <app-password-reglas [valor]="form.controls.password.value" />
+      </div>
+
+      <div class="mb-3">
+        <label for="confirmar" class="form-label fw-semibold">Confirmar contraseña *</label>
+        <input id="confirmar" type="password" class="form-control" formControlName="confirmar" autocomplete="new-password"
+               [class.is-invalid]="(invalido('confirmar') || form.hasError('noCoinciden')) && form.controls.confirmar.touched" />
+        <div class="invalid-feedback">
+          @if (form.hasError('noCoinciden')) { Las contraseñas no coinciden. } @else { Confirma tu contraseña. }
+        </div>
+      </div>
+
+      <div class="form-check mb-3">
+        <input id="normas" type="checkbox" class="form-check-input" formControlName="normas" [class.is-invalid]="invalido('normas')" />
+        <label for="normas" class="form-check-label">Acepto las normas de convivencia del foro *</label>
+        <div class="invalid-feedback">Debes aceptar las normas para registrarte.</div>
+      </div>
+
+      <button type="submit" class="btn btn-coral w-100"><i class="bi bi-person-plus"></i> Crear cuenta</button>
+    </form>
+
+    <p class="text-center mt-3">¿Ya tienes cuenta? <a routerLink="/login">Inicia sesión</a></p>
+  </div>
+</div>

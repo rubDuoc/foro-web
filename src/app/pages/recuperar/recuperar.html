@@ -1,0 +1,62 @@
+<!-- VISTA (MVC): recuperar contraseña -->
+<div class="container py-5">
+  <div class="caja-formulario mx-auto">
+    <div class="text-center mb-4">
+      <i class="bi bi-key display-5 texto-coral"></i>
+      <h1 class="h3 mt-2">Recuperar contraseña</h1>
+      <p class="text-muted">Paso {{ paso() }} de 2</p>
+      <div class="progress" role="progressbar" aria-label="Avance" [attr.aria-valuenow]="paso() * 50" aria-valuemin="0" aria-valuemax="100" style="height: 6px">
+        <div class="progress-bar" [style.width.%]="paso() * 50"></div>
+      </div>
+    </div>
+
+    @if (error()) {
+      <div class="alert alert-danger" role="alert"><i class="bi bi-exclamation-triangle"></i> {{ error() }}</div>
+    }
+
+    @if (paso() === 1) {
+      <form class="tarjeta card p-4" [formGroup]="formCorreo" (ngSubmit)="enviarCodigo()" novalidate>
+        <p>Ingresa el correo de tu cuenta y te enviaremos un código de verificación.</p>
+        <label for="email" class="form-label fw-semibold">Correo electrónico</label>
+        <input id="email" type="email" class="form-control mb-1" formControlName="email" autocomplete="email"
+               [class.is-invalid]="invalido('correo', 'email')" />
+        <div class="invalid-feedback">Ingresa un correo válido.</div>
+        <button type="submit" class="btn btn-primary w-100 mt-3"><i class="bi bi-envelope"></i> Enviar código</button>
+      </form>
+    } @else {
+      <div class="alert alert-info" role="status">
+        <i class="bi bi-envelope-check"></i> Enviamos un código a <strong>{{ formCorreo.controls.email.value }}</strong>.
+        <div class="small mt-1">(Simulación: el código es <strong>{{ codigoEnviado() }}</strong>)</div>
+      </div>
+      <form class="tarjeta card p-4" [formGroup]="formNueva" (ngSubmit)="restablecer()" novalidate>
+        <div class="mb-3">
+          <label for="codigo" class="form-label fw-semibold">Código de 6 dígitos</label>
+          <input id="codigo" type="text" inputmode="numeric" maxlength="6" class="form-control" formControlName="codigo"
+                 [class.is-invalid]="invalido('nueva', 'codigo')" />
+          <div class="invalid-feedback">El código tiene 6 dígitos.</div>
+        </div>
+        <div class="mb-3">
+          <label for="password" class="form-label fw-semibold">Nueva contraseña</label>
+          <input id="password" type="password" class="form-control" formControlName="password" autocomplete="new-password"
+                 [class.is-invalid]="invalido('nueva', 'password')" />
+          <div class="invalid-feedback">La contraseña no cumple todos los requisitos.</div>
+          <app-password-reglas [valor]="formNueva.controls.password.value" />
+        </div>
+        <div class="mb-3">
+          <label for="confirmar" class="form-label fw-semibold">Confirmar nueva contraseña</label>
+          <input id="confirmar" type="password" class="form-control" formControlName="confirmar" autocomplete="new-password"
+                 [class.is-invalid]="(invalido('nueva', 'confirmar') || formNueva.hasError('noCoinciden')) && formNueva.controls.confirmar.touched" />
+          <div class="invalid-feedback">
+            @if (formNueva.hasError('noCoinciden')) { Las contraseñas no coinciden. } @else { Confirma la contraseña. }
+          </div>
+        </div>
+        <div class="d-flex flex-column flex-sm-row gap-2">
+          <button type="button" class="btn btn-light" (click)="paso.set(1)">Volver</button>
+          <button type="submit" class="btn btn-coral flex-grow-1"><i class="bi bi-check2-circle"></i> Cambiar contraseña</button>
+        </div>
+      </form>
+    }
+
+    <p class="text-center mt-3"><a routerLink="/login"><i class="bi bi-arrow-left"></i> Volver a iniciar sesión</a></p>
+  </div>
+</div>

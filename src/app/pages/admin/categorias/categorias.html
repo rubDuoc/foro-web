@@ -1,0 +1,63 @@
+<!-- VISTA (MVC): gestion de categorias -->
+<div class="container py-4">
+  <h1 class="h2 titulo-seccion mb-4"><i class="bi bi-tags"></i> Categorías</h1>
+
+  @if (mensaje()) { <div class="alert alert-success" role="status">{{ mensaje() }}</div> }
+  @if (error()) { <div class="alert alert-danger" role="alert"><i class="bi bi-exclamation-triangle"></i> {{ error() }}</div> }
+
+  <div class="row g-4">
+    <div class="col-12 col-lg-7">
+      <div class="row g-3">
+        @for (categoria of categorias$ | async; track categoria.id) {
+          <div class="col-12 col-sm-6">
+            <div class="tarjeta card p-3 h-100">
+              <div class="d-flex gap-3">
+                <span class="icono-categoria"><i class="bi" [class]="categoria.icono"></i></span>
+                <div class="flex-grow-1">
+                  <h2 class="h6 mb-1">{{ categoria.nombre }}</h2>
+                  <p class="small text-muted mb-2">{{ categoria.descripcion }}</p>
+                  <span class="badge etiqueta">{{ categoria.cantidad }} temas</span>
+                </div>
+              </div>
+              <div class="d-flex gap-2 mt-3">
+                <button class="btn btn-outline-primary btn-sm" type="button" (click)="editar(categoria)"><i class="bi bi-pencil"></i> Editar</button>
+                <button class="btn btn-outline-danger btn-sm" type="button" (click)="eliminar(categoria)"><i class="bi bi-trash"></i> Eliminar</button>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <div class="col-12 col-lg-5">
+      <form class="tarjeta card p-4" [formGroup]="form" (ngSubmit)="guardar()" novalidate>
+        <h2 class="h5 mb-3">{{ editandoId() ? 'Editar categoría' : 'Nueva categoría' }}</h2>
+        <div class="mb-3">
+          <label for="nombre" class="form-label fw-semibold">Nombre *</label>
+          <input id="nombre" type="text" class="form-control" formControlName="nombre" maxlength="50" [class.is-invalid]="invalido('nombre')" />
+          <div class="invalid-feedback">Entre 3 y 50 caracteres.</div>
+        </div>
+        <div class="mb-3">
+          <label for="descripcion" class="form-label fw-semibold">Descripción</label>
+          <textarea id="descripcion" class="form-control" rows="2" formControlName="descripcion" maxlength="255" [class.is-invalid]="invalido('descripcion')"></textarea>
+          <div class="invalid-feedback">Máximo 255 caracteres.</div>
+        </div>
+        <fieldset class="mb-3">
+          <legend class="form-label fw-semibold fs-6">Ícono</legend>
+          <div class="d-flex flex-wrap gap-2">
+            @for (icono of iconos; track icono) {
+              <input type="radio" class="btn-check" formControlName="icono" [value]="icono" [id]="icono" />
+              <label class="btn btn-outline-primary" [for]="icono"><i class="bi" [class]="icono"></i></label>
+            }
+          </div>
+        </fieldset>
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn btn-coral"><i class="bi bi-save"></i> Guardar</button>
+          @if (editandoId()) {
+            <button type="button" class="btn btn-light" (click)="cancelar()">Cancelar</button>
+          }
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

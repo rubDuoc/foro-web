@@ -1,0 +1,119 @@
+<!-- VISTA (MVC): panel de moderacion del administrador -->
+<div class="container py-4">
+  <h1 class="h2 titulo-seccion mb-1"><i class="bi bi-shield-check"></i> Moderación</h1>
+  <p class="text-muted mb-4">Revisa los reportes de la comunidad y decide si el contenido incumple las normas.</p>
+
+  @if (mensaje()) {
+    <div class="alert alert-success alert-dismissible" role="status">
+      <i class="bi bi-check-circle"></i> {{ mensaje() }}
+      <button type="button" class="btn-close" aria-label="Cerrar" (click)="mensaje.set('')"></button>
+    </div>
+  }
+  @if (error()) {
+    <div class="alert alert-danger" role="alert">{{ error() }}</div>
+  }
+
+  <ul class="nav nav-tabs mb-4 flex-nowrap overflow-auto">
+    <li class="nav-item">
+      <button class="nav-link text-nowrap" [class.active]="pestana() === 'cola'" type="button" (click)="pestana.set('cola')">
+        <i class="bi bi-inbox"></i> Reportes pendientes
+        <span class="badge rounded-pill text-bg-danger">{{ (pendientes$ | async)?.length }}</span>
+      </button>
+    </li>
+    <li class="nav-item">
+      <button class="nav-link text-nowrap" [class.active]="pestana() === 'baneados'" type="button" (click)="pestana.set('baneados')">
+        <i class="bi bi-slash-circle"></i> Contenido baneado
+      </button>
+    </li>
+    <li class="nav-item">
+      <button class="nav-link text-nowrap" [class.active]="pestana() === 'historial'" type="button" (click)="pestana.set('historial')">
+        <i class="bi bi-clock-history"></i> Historial
+      </button>
+    </li>
+  </ul>
+
+  @switch (pestana()) {
+    @case ('cola') {
+      <div class="row g-3">
+        @for (reporte of pendientes$ | async; track reporte.id) {
+          <div class="col-12 col-lg-6">
+            <div class="tarjeta card p-3 h-100">
+              <div class="d-flex justify-content-between flex-wrap gap-2 mb-2">
+                <span class="badge etiqueta">{{ reporte.tipoContenido === 'TEMA' ? 'Tema' : 'Comentario' }} #{{ reporte.contenidoId }}</span>
+                <small class="text-muted">Reportado por {{ usuarios.nombreDe(reporte.usuarioId) }} · {{ reporte.fechaReporte | date: 'dd-MM-yyyy' }}</small>
+              </div>
+              <p class="extracto small mb-2">{{ reporte.extracto }}</p>
+              <p class="mb-3"><strong>Motivo:</strong> {{ reporte.motivo }}</p>
+
+              @if (accionAbierta()?.reporte?.id === reporte.id) {
+                <label class="form-label small fw-semibold" [for]="'motivo' + reporte.id">
+                  Motivo de la decisión ({{ accionAbierta()?.accion === 'BANEAR' ? 'banear' : 'descartar' }})
+                </label>
+                <textarea [id]="'motivo' + reporte.id" class="form-control mb-2" rows="2" maxlength="300" [formControl]="motivo"
+                          [class.is-invalid]="motivo.invalid && motivo.touched"></textarea>
+                <div class="invalid-feedback mb-2">Indica un motivo (entre 5 y 300 caracteres).</div>
+                <div class="d-flex gap-2">
+                  <button class="btn btn-sm" type="button" (click)="confirmar()"
+                          [class.btn-danger]="accionAbierta()?.accion === 'BANEAR'" [class.btn-secondary]="accionAbierta()?.accion === 'DESCARTAR'">
+                    Confirmar
+                  </button>
+                  <button class="btn btn-sm btn-light" type="button" (click)="accionAbierta.set(null)">Cancelar</button>
+                </div>
+              } @else {
+                <div class="d-flex flex-wrap gap-2 mt-auto">
+                  <button class="btn btn-danger btn-sm" type="button" (click)="abrir(reporte, 'BANEAR')"><i class="bi bi-slash-circle"></i> Banear</button>
+                  <button class="btn btn-outline-secondary btn-sm" type="button" (click)="abrir(reporte, 'DESCARTAR')"><i class="bi bi-x-circle"></i> Descartar</button>
+                  @if (enlaceTema(reporte.tipoContenido, reporte.contenidoId); as temaId) {
+                    <a class="btn btn-link btn-sm" [routerLink]="['/temas', temaId]">Ver en el foro</a>
+                  }
+                </div>
+              }
+            </div>
+          </div>
+        } @empty {
+          <div class="col-12"><div class="alert alert-light border text-center"><i class="bi bi-emoji-smile"></i> No hay reportes pendientes.</div></div>
+        }
+      </div>
+    }
+
+    @case ('baneados') {
+      <div class="row g-3">
+        @for (item of baneados$ | async; track item.tipo + item.id) {
+          <div class="col-12 col-md-6">
+            <div class="tarjeta card p-3 h-100">
+              <span class="badge text-bg-danger align-self-start mb-2">{{ item.tipo === 'TEMA' ? 'Tema' : 'Comentario' }} #{{ item.id }}</span>
+              <p class="mb-1">{{ item.texto }}</p>
+              <small class="text-muted mb-3">Autor: {{ usuarios.nombreDe(item.autorId) }} · Motivo: {{ item.motivo || 'sin motivo' }}</small>
+              <button class="btn btn-outline-success btn-sm align-self-start mt-auto" type="button" (click)="desbanear(item.tipo, item.id)">
+                <i class="bi bi-arrow-counterclockwise"></i> Desbanear
+              </button>
+            </div>
+          </div>
+        } @empty {
+          <div class="col-12"><div class="alert alert-light border text-center">No hay contenido baneado.</div></div>
+        }
+      </div>
+    }
+
+    @case ('historial') {
+      <div class="table-responsive tarjeta card">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr><th>Fecha</th><th>Acción</th><th>Contenido</th><th>Administrador</th><th>Motivo</th></tr>
+          </thead>
+          <tbody>
+            @for (m of historial$ | async; track m.id) {
+              <tr>
+                <td class="text-nowrap">{{ m.fecha | date: 'dd-MM-yyyy HH:mm' }}</td>
+                <td><span class="badge" [class]="colorAccion(m.accion)">{{ m.accion }}</span></td>
+                <td class="text-nowrap">{{ m.tipoContenido === 'TEMA' ? 'Tema' : 'Comentario' }} #{{ m.contenidoId }}</td>
+                <td>{{ usuarios.nombreDe(m.adminId) }}</td>
+                <td class="small">{{ m.motivo }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  }
+</div>

@@ -1,0 +1,60 @@
+<!-- VISTA (MVC): listado y busqueda de temas -->
+<div class="container py-4">
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-4">
+    <h1 class="h2 titulo-seccion mb-0">
+      {{ categoria() ? 'Temas de ' + nombreCategoria(categoria()) : 'Todos los temas' }}
+    </h1>
+    @if (auth.usuario$ | async) {
+      <a class="btn btn-coral" routerLink="/publicar"><i class="bi bi-plus-circle"></i> Publicar tema</a>
+    }
+  </div>
+
+  <div class="tarjeta card p-3 mb-4">
+    <div class="row g-2">
+      <div class="col-12 col-md-8">
+        <label for="busqueda" class="form-label visually-hidden">Buscar</label>
+        <div class="input-group">
+          <span class="input-group-text"><i class="bi bi-search"></i></span>
+          <input id="busqueda" type="search" class="form-control" placeholder="Buscar por título o contenido"
+                 [formControl]="busqueda" maxlength="100" />
+        </div>
+      </div>
+      <div class="col-12 col-md-4">
+        <label for="filtroCategoria" class="form-label visually-hidden">Categoría</label>
+        <select id="filtroCategoria" class="form-select" [value]="categoria() ?? ''"
+                (change)="cambiarCategoria($any($event.target).value)">
+          <option value="">Todas las categorías</option>
+          @for (c of categorias$ | async; track c.id) {
+            <option [value]="c.id" [selected]="c.id === +(categoria() ?? 0)">{{ c.nombre }}</option>
+          }
+        </select>
+      </div>
+    </div>
+  </div>
+
+  @if (temas$ | async; as temas) {
+    <p class="text-muted">{{ temas.length }} {{ temas.length === 1 ? 'tema encontrado' : 'temas encontrados' }}</p>
+    <div class="row g-3">
+      @for (tema of temas; track tema.id) {
+        <div class="col-12 col-md-6 col-xl-4">
+          <a class="tarjeta card h-100 p-3 text-decoration-none text-reset" [routerLink]="['/temas', tema.id]">
+            <span class="badge etiqueta align-self-start mb-2">{{ nombreCategoria(tema.categoriaId) }}</span>
+            <h2 class="h5">{{ tema.titulo }}</h2>
+            <p class="text-muted">{{ tema.contenido | slice: 0 : 120 }}{{ tema.contenido.length > 120 ? '…' : '' }}</p>
+            <small class="text-muted mt-auto d-flex flex-wrap gap-2">
+              <span><i class="bi bi-person"></i> {{ usuarios.nombreDe(tema.usuarioId) }}</span>
+              <span><i class="bi bi-calendar3"></i> {{ tema.fechaCreacion | date: 'dd-MM-yyyy' }}</span>
+              <span><i class="bi bi-chat-dots"></i> {{ tema.comentarios }}</span>
+            </small>
+          </a>
+        </div>
+      } @empty {
+        <div class="col-12">
+          <div class="alert alert-light border text-center">
+            <i class="bi bi-inbox fs-3 d-block mb-2"></i>No hay temas que coincidan con la búsqueda.
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>
