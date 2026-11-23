@@ -1,0 +1,17 @@
+# Dependencias y artefactos (se generan dentro de la imagen)
+node_modules
+dist
+.angular
+coverage
+
+# Control de versiones y configuracion local
+.git
+.gitignore
+.vscode
+.editorconfig
+
+# No se necesitan dentro de la imagen
+*.log
+Dockerfile
+.dockerignore
+README.md
